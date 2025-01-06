@@ -43,11 +43,28 @@ jobs:
         run: |
           docker push $IMAGE_URI
 
-      # Paso 7: Desplegar la imagen en ECS
+      # Paso 7: Crear el servicio si no existe
+      - name: Create ECS service if not exists
+        run: |
+          SERVICE_EXISTS=$(aws ecs describe-services --cluster prueba_2 --services api-service --query "services[0].serviceName" --output text)
+          if [ "$SERVICE_EXISTS" == "None" ]; then
+            echo "Creating ECS service api-service"
+            aws ecs create-service \
+              --cluster prueba_2 \
+              --service-name api-service \
+              --task-definition ecs-task-definition.json \
+              --desired-count 1 \
+              --launch-type FARGATE \
+              --network-configuration "awsvpcConfiguration={subnets=[subnet-xxxxxxxx],securityGroups=[sg-xxxxxxxx],assignPublicIp=ENABLED}"
+          else
+            echo "ECS service api-service already exists"
+          fi
+
+      # Paso 8: Desplegar la imagen en ECS
       - name: Deploy to ECS
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
-          task-definition: ecs-task-definition.json  # Asegúrate de que la ruta sea correcta
-          service: api-service  # Cambia por tu nombre de servicio ECS
-          cluster: prueba_2  # Usa el nombre correcto de tu clúster
+          task-definition: ecs-task-definition.json
+          service: api-service
+          cluster: prueba_2
           wait-for-service-stability: true
