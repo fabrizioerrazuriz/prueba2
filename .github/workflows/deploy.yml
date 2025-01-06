@@ -3,58 +3,46 @@ name: CI/CD for ECS
 on:
   push:
     branches:
-      - main
+      - main  # Ejecutar el pipeline cada vez que se haga un push en la rama "main"
 
 jobs:
   build-and-deploy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest  # Usar la última versión de Ubuntu
 
     steps:
       # Paso 1: Checkout del código
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Paso 2: Configurar credenciales de AWS
+      # Paso 2: Configurar las credenciales de AWS
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v3
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-2
+          aws-region: us-east-2  # Cambia la región si es necesario
 
-      # Paso 3: Crear Dockerfile dinámicamente
-      - name: Create Dockerfile
-        run: |
-          echo "FROM node:16-alpine" > Dockerfile
-          echo "WORKDIR /app" >> Dockerfile
-          echo "COPY package*.json ./" >> Dockerfile  # Copiar solo los archivos package.json y package-lock.json primero
-          echo "COPY . ." >> Dockerfile  # Copiar el resto de los archivos de la aplicación
-          echo "RUN ls -al /app" >> Dockerfile  # Listar archivos en /app para diagnóstico
-          echo "RUN npm install --verbose" >> Dockerfile  # Ejecutar npm install con verbose
-          echo "CMD ['node', 'app.js']" >> Dockerfile
-          cat Dockerfile  # Imprime el Dockerfile generado para revisión
-
-      # Paso 4: Loguearse en Amazon ECR
+      # Paso 3: Loguearse en Amazon ECR
       - name: Log in to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
 
-      # Paso 5: Construir la imagen Docker
+      # Paso 4: Construir la imagen Docker usando el Dockerfile
       - name: Build Docker image
         run: |
-          IMAGE_URI=971422693729.dkr.ecr.us-east-2.amazonaws.com/prueba-2:latest
-          docker build -t $IMAGE_URI .
-          echo "IMAGE_URI=$IMAGE_URI" >> $GITHUB_ENV
+          IMAGE_URI=971422693729.dkr.ecr.us-east-2.amazonaws.com/prueba-2:latest  # Reemplaza con tu URI de ECR
+          docker build -t $IMAGE_URI .  # Construir la imagen Docker desde el Dockerfile en la raíz
+          echo "IMAGE_URI=$IMAGE_URI" >> $GITHUB_ENV  # Guardar el URI de la imagen en el entorno
 
-      # Paso 6: Push de la imagen Docker a Amazon ECR
-      - name: Push Docker image
+      # Paso 5: Push de la imagen Docker a Amazon ECR
+      - name: Push Docker image to Amazon ECR
         run: |
-          docker push $IMAGE_URI
+          docker push $IMAGE_URI  # Subir la imagen construida a Amazon ECR
 
-      # Paso 7: Desplegar a ECS
+      # Paso 6: Desplegar la imagen en ECS
       - name: Deploy to ECS
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
-          task-definition: ecs-task-definition.json
-          service: api-service
-          cluster: MyCluster
+          task-definition: ecs-task-definition.json  # Define tu archivo task definition aquí
+          service: api-service  # Cambia por tu nombre de servicio ECS
+          cluster: MyCluster  # Cambia por tu nombre de clúster ECS
           wait-for-service-stability: true
