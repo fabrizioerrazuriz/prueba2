@@ -20,7 +20,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-2  # Asegúrate de que esta región sea la correcta
+          aws-region: us-east-2
 
       # Paso 3: Loguearse en Amazon ECR
       - name: Log in to Amazon ECR
@@ -38,33 +38,41 @@ jobs:
           docker build -t $IMAGE_URI .
           echo "IMAGE_URI=$IMAGE_URI" >> $GITHUB_ENV
 
-      # Paso 6: Push de la imagen Docker a Amazon ECR
+      # Paso 6: Registrar la definición de tarea ECS
+      - name: Register ECS task definition
+        run: |
+          echo "Registrando la definición de tarea ECS..."
+          aws ecs register-task-definition \
+            --family api-task-definition \
+            --container-definitions file://ecs-task-definition.json --region us-east-2
+
+      # Paso 7: Push de la imagen Docker a Amazon ECR
       - name: Push Docker image to Amazon ECR
         run: |
           docker push $IMAGE_URI
 
-      # Paso 7: Crear el servicio si no existe
+      # Paso 8: Crear el servicio ECS si no existe
       - name: Create ECS service if not exists
         run: |
-          SERVICE_EXISTS=$(aws ecs describe-services --cluster prueba_2 --services api-service --query "services[0].serviceName" --output text)
+          SERVICE_EXISTS=$(aws ecs describe-services --cluster prueba_2 --services api-service --query "services[0].serviceName" --output text --region us-east-2)
           if [ "$SERVICE_EXISTS" == "None" ]; then
-            echo "Creating ECS service api-service"
+            echo "Creating ECS service api-service..."
             aws ecs create-service \
               --cluster prueba_2 \
               --service-name api-service \
-              --task-definition ecs-task-definition.json \
+              --task-definition api-task-definition \
               --desired-count 1 \
               --launch-type FARGATE \
-              --network-configuration "awsvpcConfiguration={subnets=[subnet-xxxxxxxx],securityGroups=[sg-xxxxxxxx],assignPublicIp=ENABLED}"
+              --network-configuration "awsvpcConfiguration={subnets=[subnet-xxxxxxxx],securityGroups=[sg-xxxxxxxx],assignPublicIp=ENABLED}" --region us-east-2
           else
             echo "ECS service api-service already exists"
           fi
 
-      # Paso 8: Desplegar la imagen en ECS
+      # Paso 9: Desplegar la imagen en ECS
       - name: Deploy to ECS
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
-          task-definition: ecs-task-definition.json
+          task-definition: api-task-definition
           service: api-service
           cluster: prueba_2
           wait-for-service-stability: true
