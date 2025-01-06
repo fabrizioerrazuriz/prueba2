@@ -1,4 +1,4 @@
-
+{
   "family": "api-task-definition",
   "containerDefinitions": [
     {
@@ -16,4 +16,4 @@
       ]
     }
   ]
-
+}
