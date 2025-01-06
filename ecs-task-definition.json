@@ -1,0 +1,18 @@
+{
+    "family": "my-ecs-task",
+    "containerDefinitions": [
+      {
+        "name": "my-app",
+        "image": "971422693729.dkr.ecr.us-east-2.amazonaws.com/prueba-2:latest",
+        "memory": 512,
+        "cpu": 256,
+        "essential": true,
+        "portMappings": [
+          {
+            "containerPort": 3000,
+            "hostPort": 3000
+          }
+        ]
+      }
+    ]
+  }
