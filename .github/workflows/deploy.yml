@@ -1,0 +1,39 @@
+name: CI/CD for ECS
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout code
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Log in to Amazon ECR
+      - name: Log in to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      # Build Docker image
+      - name: Build Docker image
+        run: |
+          IMAGE_URI=$(aws ecr describe-repositories --repository-names api-repo --query 'repositories[0].repositoryUri' --output text)
+          docker build -t $IMAGE_URI .
+          echo "IMAGE_URI=$IMAGE_URI" >> $GITHUB_ENV
+
+      # Push Docker image to ECR
+      - name: Push Docker image
+        run: |
+          docker push $IMAGE_URI
+
+      # Deploy to ECS
+      - name: Deploy to ECS
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ecs-task-definition.json
+          service: api-service
+          cluster: MyCluster
+          wait-for-service-stability: true
