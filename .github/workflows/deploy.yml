@@ -22,16 +22,16 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-2
 
-      # Paso 3: Crear Dockerfile automáticamente
+      # Paso 3: Crear Dockerfile dinámicamente
       - name: Create Dockerfile
         run: |
           echo "FROM node:16-alpine" > Dockerfile
           echo "WORKDIR /app" >> Dockerfile
-          echo "COPY package*.json ./" >> Dockerfile
-          echo "COPY . ." >> Dockerfile
-          echo "RUN npm install --verbose" >> Dockerfile
+          echo "COPY package*.json ./" >> Dockerfile  # Copiar solo los archivos package.json y package-lock.json primero
+          echo "COPY . ." >> Dockerfile  # Copiar el resto de los archivos de la aplicación
+          echo "RUN npm install --verbose" >> Dockerfile  # Ejecutar npm install con verbose
           echo "CMD ['node', 'app.js']" >> Dockerfile
-          cat Dockerfile  # Verifica el contenido del Dockerfile generado
+          cat Dockerfile  # Imprime el Dockerfile generado para revisión
 
       # Paso 4: Loguearse en Amazon ECR
       - name: Log in to Amazon ECR
