@@ -20,7 +20,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-2
+          aws-region: us-east-2  # Asegúrate de que esta región sea la correcta
 
       # Paso 3: Loguearse en Amazon ECR
       - name: Log in to Amazon ECR
@@ -47,7 +47,7 @@ jobs:
       - name: Deploy to ECS
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
-          task-definition: ecs-task-definition.json  # Define tu archivo task definition aquí
+          task-definition: ecs-task-definition.json  # Asegúrate de que la ruta sea correcta
           service: api-service  # Cambia por tu nombre de servicio ECS
-          cluster: MyCluster  # Cambia por tu nombre de clúster ECS
+          cluster: prueba_2  # Usa el nombre correcto de tu clúster
           wait-for-service-stability: true
