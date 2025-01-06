@@ -29,6 +29,7 @@ jobs:
           echo "WORKDIR /app" >> Dockerfile
           echo "COPY package*.json ./" >> Dockerfile  # Copiar solo los archivos package.json y package-lock.json primero
           echo "COPY . ." >> Dockerfile  # Copiar el resto de los archivos de la aplicación
+          echo "RUN ls -al /app" >> Dockerfile  # Listar archivos en /app para diagnóstico
           echo "RUN npm install --verbose" >> Dockerfile  # Ejecutar npm install con verbose
           echo "CMD ['node', 'app.js']" >> Dockerfile
           cat Dockerfile  # Imprime el Dockerfile generado para revisión
