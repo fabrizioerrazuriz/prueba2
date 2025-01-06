@@ -1,20 +1,19 @@
 {
-    "family": "api-task-definition",
-    "containerDefinitions": [
-      {
-        "name": "api-container",
-        "image": "971422693729.dkr.ecr.us-east-2.amazonaws.com/prueba-2:latest",
-        "memory": 512,
-        "cpu": 256,
-        "essential": true,
-        "portMappings": [
-          {
-            "containerPort": 8080,
-            "hostPort": 8080,
-            "protocol": "tcp"
-          }
-        ]
-      }
-    ]
-  }
-  
+  "family": "api-task-definition",
+  "containerDefinitions": [
+    {
+      "name": "api-container",
+      "image": "971422693729.dkr.ecr.us-east-2.amazonaws.com/prueba-2:latest",
+      "memory": 512,
+      "cpu": 256,
+      "essential": true,
+      "portMappings": [
+        {
+          "containerPort": 8080,
+          "hostPort": 8080,
+          "protocol": "tcp"
+        }
+      ]
+    }
+  ]
+}
