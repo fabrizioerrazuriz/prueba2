@@ -3,11 +3,11 @@ name: CI/CD for ECS
 on:
   push:
     branches:
-      - main  # Ejecutar el pipeline cada vez que se haga un push en la rama "main"
+      - main
 
 jobs:
   build-and-deploy:
-    runs-on: ubuntu-latest  # Usar la última versión de Ubuntu
+    runs-on: ubuntu-latest
 
     steps:
       # Paso 1: Checkout del código
@@ -20,25 +20,30 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-2  # Cambia la región si es necesario
+          aws-region: us-east-2
 
       # Paso 3: Loguearse en Amazon ECR
       - name: Log in to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
 
-      # Paso 4: Construir la imagen Docker usando el Dockerfile
+      # Paso 4: Crear el repositorio de ECR si no existe
+      - name: Create ECR repository if not exists
+        run: |
+          aws ecr describe-repositories --repository-name prueba-2 || aws ecr create-repository --repository-name prueba-2 --region us-east-2
+
+      # Paso 5: Construir la imagen Docker
       - name: Build Docker image
         run: |
-          IMAGE_URI=971422693729.dkr.ecr.us-east-2.amazonaws.com/prueba-2:latest  # Reemplaza con tu URI de ECR
-          docker build -t $IMAGE_URI .  # Construir la imagen Docker desde el Dockerfile en la raíz
-          echo "IMAGE_URI=$IMAGE_URI" >> $GITHUB_ENV  # Guardar el URI de la imagen en el entorno
+          IMAGE_URI=971422693729.dkr.ecr.us-east-2.amazonaws.com/prueba-2:latest
+          docker build -t $IMAGE_URI .
+          echo "IMAGE_URI=$IMAGE_URI" >> $GITHUB_ENV
 
-      # Paso 5: Push de la imagen Docker a Amazon ECR
+      # Paso 6: Push de la imagen Docker a Amazon ECR
       - name: Push Docker image to Amazon ECR
         run: |
-          docker push $IMAGE_URI  # Subir la imagen construida a Amazon ECR
+          docker push $IMAGE_URI
 
-      # Paso 6: Desplegar la imagen en ECS
+      # Paso 7: Desplegar la imagen en ECS
       - name: Deploy to ECS
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
