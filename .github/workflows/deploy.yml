@@ -38,13 +38,14 @@ jobs:
           docker build -t $IMAGE_URI .
           echo "IMAGE_URI=$IMAGE_URI" >> $GITHUB_ENV
 
-      # Paso 6: Registrar la definición de tarea ECS
+      # Paso 6: Registrar la definición de tarea ECS desde el archivo en el repositorio
       - name: Register ECS task definition
         run: |
           echo "Registrando la definición de tarea ECS..."
           aws ecs register-task-definition \
             --family api-task-definition \
-            --container-definitions file://ecs-task-definition.json --region us-east-2
+            --container-definitions file://ecs-task-definition.json \
+            --region us-east-2
 
       # Paso 7: Push de la imagen Docker a Amazon ECR
       - name: Push Docker image to Amazon ECR
