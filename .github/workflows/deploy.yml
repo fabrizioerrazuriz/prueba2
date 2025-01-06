@@ -8,12 +8,13 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+
     steps:
-      # Checkout code
+      # Paso 1: Checkout del código
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Configure AWS credentials
+      # Paso 2: Configurar credenciales de AWS
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v3
         with:
@@ -21,23 +22,33 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-2
 
-      # Log in to Amazon ECR
+      # Paso 3: Crear Dockerfile automáticamente
+      - name: Create Dockerfile
+        run: |
+          echo "FROM node:16-alpine" > Dockerfile
+          echo "WORKDIR /app" >> Dockerfile
+          echo "COPY . ." >> Dockerfile
+          echo "RUN npm install" >> Dockerfile
+          echo "CMD ['node', 'app.js']" >> Dockerfile
+          cat Dockerfile  # Verifica el contenido del Dockerfile generado
+
+      # Paso 4: Loguearse en Amazon ECR
       - name: Log in to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
 
-      # Build Docker image
+      # Paso 5: Construir la imagen Docker
       - name: Build Docker image
         run: |
           IMAGE_URI=971422693729.dkr.ecr.us-east-2.amazonaws.com/prueba-2:latest
           docker build -t $IMAGE_URI .
           echo "IMAGE_URI=$IMAGE_URI" >> $GITHUB_ENV
 
-      # Push Docker image to ECR
+      # Paso 6: Push de la imagen Docker a Amazon ECR
       - name: Push Docker image
         run: |
           docker push $IMAGE_URI
 
-      # Deploy to ECS
+      # Paso 7: Desplegar a ECS
       - name: Deploy to ECS
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
