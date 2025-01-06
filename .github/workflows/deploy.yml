@@ -19,7 +19,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-2
+          aws-region: us-east-2  # Cambia a tu región
 
       # Log in to Amazon ECR
       - name: Log in to Amazon ECR
@@ -28,7 +28,7 @@ jobs:
       # Build Docker image
       - name: Build Docker image
         run: |
-          IMAGE_URI=$(aws ecr describe-repositories --repository-names api-repo --query 'repositories[0].repositoryUri' --output text)
+          IMAGE_URI=971422693729.dkr.ecr.us-east-2.amazonaws.com/prueba-2:latest
           docker build -t $IMAGE_URI .
           echo "IMAGE_URI=$IMAGE_URI" >> $GITHUB_ENV
 
