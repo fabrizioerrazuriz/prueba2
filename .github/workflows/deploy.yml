@@ -27,8 +27,9 @@ jobs:
         run: |
           echo "FROM node:16-alpine" > Dockerfile
           echo "WORKDIR /app" >> Dockerfile
+          echo "COPY package*.json ./" >> Dockerfile
           echo "COPY . ." >> Dockerfile
-          echo "RUN npm install" >> Dockerfile
+          echo "RUN npm install --verbose" >> Dockerfile
           echo "CMD ['node', 'app.js']" >> Dockerfile
           cat Dockerfile  # Verifica el contenido del Dockerfile generado
 
