@@ -37,7 +37,7 @@ jobs:
           echo "Registrando la definición de tarea ECS..."
           aws ecs register-task-definition \
             --family api-task-definition \
-            --container-definitions file://$(pwd)/ecs-task-definition.json \
+            --container-definitions "file://$(pwd)/ecs-task-definition.json" \
             --region us-east-2
 
       - name: Deploy to ECS
